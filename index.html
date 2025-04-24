@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clickjacking Example with Formspree</title>
+  <style>
+    body {
+      text-align: center;
+      margin-top: 100px;
+      font-family: Tahoma, Arial, sans-serif;
+    }
+
+    #fakeButton {
+      position: relative;
+      z-index: 2;
+      padding: 20px 40px;
+      font-size: 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #realForm {
+      position: absolute;
+      top: 150px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: auto; /* تغییر اندازه ارتفاع برای گنجاندن فیلدها */
+      opacity: 1; /* فرم به‌طور کامل قابل مشاهده است */
+      z-index: 1;
+      pointer-events: auto; /* فرم دیگر غیرقابل تعامل نیست */
+    }
+
+    p {
+      color: gray;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>برای ارسال فرم، روی دکمه کلیک کنید!</h2>
+
+  <!-- دکمه جعلی -->
+  <button id="fakeButton">ارسال فرم</button>
+
+  <!-- فرم مخفی Formspree -->
+  <form id="realForm" action="https://formspree.io/f/xkgrwvde" method="POST">
+    <!-- فیلد ایمیل با نام و خاصیت required -->
+    <input type="email" name="email" placeholder="ایمیل خود را وارد کنید" required>
+    <!-- فیلد برای نام -->
+    <input type="text" name="name" placeholder="نام خود را وارد کنید" required>
+    <!-- فیلد برای پیام -->
+    <textarea name="message" placeholder="پیام خود را وارد کنید" required></textarea>
+    <input type="submit" value="ارسال">
+  </form>
+
+  <p>اگر فرم ارسال نشد، لطفاً دوباره روی دکمه کلیک کنید.</p>
+
+  <script>
+    // وقتی روی دکمه جعلی کلیک شد، فرم واقعی ارسال می‌شود
+    document.getElementById('fakeButton').onclick = function() {
+      // فرم رو ارسال می‌کنیم
+      document.getElementById('realForm').submit();
+    };
+  </script>
+
+</body>
+</html>
